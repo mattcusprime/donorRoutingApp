@@ -1,0 +1,16 @@
+{
+  "name": "Routing Donor App",
+  "description": "Routing Donor App",
+  "version": "0.1",
+  "main": "index.html",
+  "window": {
+    "title": "donorApp",
+	"toolbar": true,
+    "fullscreen": false,
+	"position": "center",
+	"kiosk": false,
+	"width": 1200,
+	"height": 1000
+	
+  }
+}
