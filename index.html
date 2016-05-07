@@ -3,7 +3,6 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-
     <title>Donor Routing App</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/s/dt/jqc-1.12.0,moment-2.11.2,dt-1.10.11,b-1.1.2,se-1.1.2/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="css/generator-base.css">
@@ -15,21 +14,23 @@
     <style>
         html, body {
             height: 100%;
-            margin: 0;
-            padding: 0;
+            width:100%;
+           
         }
 
         #map {
+            opacity: 100;
             height: 100%;
+            width:85%;
+            margin: 0 auto; 
         }
     </style>
 </head>
 <body class="dataTables">
-    <div class="container">
+    <div id="tblContainer" class="container">
         <h1>
             DataTables Editor <span>AddressesWithItems</span>
         </h1>
-       
         <table cellpadding="0" cellspacing="0" border="0" class="display" id="AddressesWithItems">
             <thead>
                 <tr>
@@ -44,26 +45,39 @@
                 </tr>
             </thead>
         </table>
-        <!--<div class="container col-xs-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-10">
-            <a href="javascript:getUrlAndCallback(urlGoogMapsUrl,initMap);"><img src="images/usaMapv2.png" class="col-xs-12 col-md-8 col-lg-8" /></a>
-        </div>-->
-       
-
         <script>
-           
             $('document').ready(function () {
-                //getUrlAndCallback(urlGoogMapsUrl, funInitMapFunction);
+                $('#showMap').click(function () {
+                    $('#tblContainer').fadeOut();
+                    $('#map').fadeIn();
+                });
+                $('#showTable').click(function () {
+                    $('#map').fadeOut();
+                    $('#tblContainer').fadeIn();
+                });
+                $('#routeAddresses').click(function () {
+                    call(funGeoCodeFunction);
+                });
+
 
             });
-            
-
         </script>
-
-      
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzyiqBO_5XdhIyozK30VcFyDKZiUD_2nw&callback=initMap" async defer></script>
-
+    </div>
+    <div class="container">
+        <button id="showMap" class="col-md-offset-2 col-md-2">Maximize Map</button>
+        <button id="showTable" class="col-md-2">Maximize Table</button>
+        <button id="routeAddresses" >Route Addresses</button>
+        <button id="setZoom" class="col-md-2">Set Zoom</button>
+        <form id="zoomForm">
+            <input id="zoomVal" type="text" />
+            <input type="submit" />
+        </form>
 
     </div>
-    <div id="map"></div>
+
+
+    <div id="map" class="col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8 col-sm-offset-2 col-sm-8 "></div>
+    <!--<div id="map"></div>-->
 </body>
 </html>
