@@ -86,7 +86,7 @@ function initMap() {
         objDirectionsService = new google.maps.DirectionsService;
         objDirectionsDisplay = new google.maps.DirectionsRenderer;
         objDirectionsDisplay.setMap(map);
-        calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay);
+        calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay,objOriginPoint,objFinalPoint,arrPositions);
 
    
 }
@@ -97,7 +97,7 @@ function call(functionToCall) {
     functionToCall();
 };
 
-function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+function calculateAndDisplayRoute(directionsService, directionsDisplay,finalDestinationObject,originDestinationObject,arrayOfWaypoints) {
     /*var waypts = [];
     var checkboxArray = document.getElementById('waypoints');
     for (var i = 0; i < checkboxArray.length; i++) {
@@ -110,9 +110,9 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay) {
     }
     */
     directionsService.route({
-        origin: objOriginPoint,
-        destination: objFinalPoint,
-        waypoints: arrPositions,
+        origin: originDestinationObject,
+        destination: finalDestinationObject,
+        waypoints: arrayOfWaypoints,
         optimizeWaypoints: true,
         travelMode: google.maps.TravelMode.DRIVING
     }, function (response, status) {
