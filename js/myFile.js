@@ -4,8 +4,8 @@ var funGeoCodeFunction;
 var map;
 var arrMarkerArray = [];
 var arrPositions = [];
-var directionsService ;//= new google.maps.DirectionsService;
-var directionsDisplay;// = new google.maps.DirectionsRenderer;
+var objDirectionsService ;//= new google.maps.DirectionsService;
+var objDirectionsDisplay;// = new google.maps.DirectionsRenderer;
 var objOriginPoint = {};
 var objFinalPoint = {};
 function calculateRoute() {
@@ -83,10 +83,10 @@ function initMap() {
             };
         };
         //console.log(arrMarkerArray);
-        directionsService = new google.maps.DirectionsService;
-        directionsDisplay = new google.maps.DirectionsRenderer;
-        directionsDisplay.setMap(map);
-        calculateAndDisplayRoute(directionsService, directionsDisplay);
+        objDirectionsService = new google.maps.DirectionsService;
+        objDirectionsDisplay = new google.maps.DirectionsRenderer;
+        objDirectionsDisplay.setMap(map);
+        calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay);
 
    
 }
