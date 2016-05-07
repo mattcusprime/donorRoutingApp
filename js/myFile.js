@@ -43,7 +43,11 @@ function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerAr
                 objOriginPoint = objPositionObject;
             }
             else if (type == "final") {
-                objOriginPoint = objFinalPoint;
+                objFinalPoint = objPositionObject;
+                objDirectionsService = new google.maps.DirectionsService;
+                objDirectionsDisplay = new google.maps.DirectionsRenderer;
+                objDirectionsDisplay.setMap(map);
+                //calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay, objOriginPoint, objFinalPoint, arrPositions);
             };
         } else {
             alert('Geocode was not successful for the following reason: ' + status);
@@ -73,7 +77,8 @@ function initMap() {
             var objCurrentRow = tableData[i];
             var strCurrentAddress = objCurrentRow.street + "," + objCurrentRow.city + "," + objCurrentRow.state + "," + objCurrentRow.zip_code;
             if (i == tableData.length - 1) {
-                geocodeAddress(strCurrentAddress, geocoder, map, true, arrMarkerArray,"final");
+                geocodeAddress(strCurrentAddress, geocoder, map, true, arrMarkerArray, "final");
+                
             }
             else if (i == 0) {
                 geocodeAddress(strCurrentAddress, geocoder, map, false, arrMarkerArray,"origin");
@@ -83,10 +88,10 @@ function initMap() {
             };
         };
         //console.log(arrMarkerArray);
-        objDirectionsService = new google.maps.DirectionsService;
+        /*objDirectionsService = new google.maps.DirectionsService;
         objDirectionsDisplay = new google.maps.DirectionsRenderer;
         objDirectionsDisplay.setMap(map);
-        calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay,objOriginPoint,objFinalPoint,arrPositions);
+        calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay,objOriginPoint,objFinalPoint,arrPositions);*/
 
    
 }
