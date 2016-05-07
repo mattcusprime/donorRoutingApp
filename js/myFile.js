@@ -22,7 +22,7 @@ function calculateRoute() {
 
 };
 
-function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerArray,type) {
+function geocodeAddress(address,labelForMarker,geocoder,resultsMap,shouldICenterTheMap,markerArray,type) {
     //var address = document.getElementById('address').value;
     geocoder.geocode({ 'address': address }, function (results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
@@ -30,7 +30,8 @@ function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerAr
             if (shouldICenterTheMap) { resultsMap.panTo(results[0].geometry.location) };
             var marker = new google.maps.Marker({
                 map: resultsMap,
-                position: results[0].geometry.location
+                position: results[0].geometry.location,
+                label: labelForMarker
             });
             markerArray.push(markerArray);
             var objPositionObject = {};
@@ -44,10 +45,10 @@ function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerAr
             }
             else if (type == "final") {
                 objFinalPoint = objPositionObject;
-                objDirectionsService = new google.maps.DirectionsService;
+                /*objDirectionsService = new google.maps.DirectionsService;
                 objDirectionsDisplay = new google.maps.DirectionsRenderer;
                 objDirectionsDisplay.setMap(map);
-                //calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay, objOriginPoint, objFinalPoint, arrPositions);
+                calculateAndDisplayRoute(objDirectionsService, objDirectionsDisplay, objOriginPoint, objFinalPoint, arrPositions);*/
             };
         } else {
             alert('Geocode was not successful for the following reason: ' + status);
@@ -76,15 +77,18 @@ function initMap() {
         for (var i = 0; i < tableData.length; i++) {
             var objCurrentRow = tableData[i];
             var strCurrentAddress = objCurrentRow.street + "," + objCurrentRow.city + "," + objCurrentRow.state + "," + objCurrentRow.zip_code;
+            var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var strMarkerLabel = labels[i];
+
             if (i == tableData.length - 1) {
-                geocodeAddress(strCurrentAddress, geocoder, map, true, arrMarkerArray, "final");
+                geocodeAddress(strCurrentAddress,strMarkerLabel, geocoder, map, true, arrMarkerArray, "final");
                 
             }
             else if (i == 0) {
-                geocodeAddress(strCurrentAddress, geocoder, map, false, arrMarkerArray,"origin");
+                geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, false, arrMarkerArray, "origin");
             }
             else {
-                geocodeAddress(strCurrentAddress, geocoder, map, false, arrMarkerArray,"mid");
+                geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, false, arrMarkerArray, "mid");
             };
         };
         //console.log(arrMarkerArray);
@@ -101,9 +105,10 @@ function initMap() {
 function call(functionToCall) {
     functionToCall();
 };
-
+// going to simplify this function..., came from an odd example..
+/*
 function calculateAndDisplayRoute(directionsService, directionsDisplay,finalDestinationObject,originDestinationObject,arrayOfWaypoints) {
-    /*var waypts = [];
+    var waypts = [];
     var checkboxArray = document.getElementById('waypoints');
     for (var i = 0; i < checkboxArray.length; i++) {
         if (checkboxArray.options[i].selected) {
@@ -113,7 +118,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay,finalDest
             });
         }
     }
-    */
+  
     directionsService.route({
         origin: originDestinationObject,
         destination: finalDestinationObject,
@@ -139,4 +144,4 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay,finalDest
             window.alert('Directions request failed due to ' + status);
         }
     });
-}
+}  */
