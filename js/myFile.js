@@ -4,6 +4,10 @@ var funGeoCodeFunction;
 var map;
 var arrMarkerArray = [];
 var arrPositions = [];
+var directionsService ;//= new google.maps.DirectionsService;
+var directionsDisplay;// = new google.maps.DirectionsRenderer;
+var objOriginPoint = {};
+var objFinalPoint = {};
 function calculateRoute() {
     var table = $('#AddressesWithItems').DataTable();
     var data = table.rows().data();
@@ -22,7 +26,8 @@ function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerAr
     //var address = document.getElementById('address').value;
     geocoder.geocode({ 'address': address }, function (results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
-            if (shouldICenterTheMap) { resultsMap.setCenter(results[0].geometry.location) };
+            //if (shouldICenterTheMap) { resultsMap.setCenter(results[0].geometry.location) };
+            if (shouldICenterTheMap) { resultsMap.panTo(results[0].geometry.location) };
             var marker = new google.maps.Marker({
                 map: resultsMap,
                 position: results[0].geometry.location
@@ -31,7 +36,15 @@ function geocodeAddress(address,geocoder,resultsMap,shouldICenterTheMap,markerAr
             var objPositionObject = {};
             objPositionObject.lat = Number(results[0].geometry.location.lat());
             objPositionObject.lng = Number(results[0].geometry.location.lng());
-            arrPositions.push(objPositionObject);
+            if (type == "mid") {
+                arrPositions.push(objPositionObject);
+            }
+            else if (type == "origin") {
+                objOriginPoint = objPositionObject;
+            }
+            else if (type == "final") {
+                objOriginPoint = objFinalPoint;
+            };
         } else {
             alert('Geocode was not successful for the following reason: ' + status);
         }
@@ -51,6 +64,7 @@ function initMap() {
         map.setZoom(numNewZoom);
     });
     geocoder = new google.maps.Geocoder();
+    
     funGeoCodeFunction = function () {
         var table = $('#AddressesWithItems').DataTable();
         $('#tblContainer').fadeOut();
@@ -69,68 +83,55 @@ function initMap() {
             };
         };
         //console.log(arrMarkerArray);
+        directionsService = new google.maps.DirectionsService;
+        directionsDisplay = new google.maps.DirectionsRenderer;
+        directionsDisplay.setMap(map);
+        calculateAndDisplayRoute(directionsService, directionsDisplay);
 
-
-    var service = new google.maps.DistanceMatrixService;
-    /*service.getDistanceMatrix({
-        origins: [arrPositions],
-        destinations: [arrPositions],
-        travelMode: google.maps.TravelMode.DRIVING,
-        unitSystem: google.maps.UnitSystem.METRIC,
-        avoidHighways: false,
-        avoidTolls: false
-    }, function(response, status) {
-        if (status !== google.maps.DistanceMatrixStatus.OK) {
-            alert('Error was: ' + status);
-        } else {
-            var originList = response.originAddresses;
-            var destinationList = response.destinationAddresses;
-            var outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '';
-            deleteMarkers(markersArray);
-
-            var showGeocodedAddressOnMap = function(asDestination) {
-                var icon = asDestination ? destinationIcon : originIcon;
-                return function(results, status) {
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        map.fitBounds(bounds.extend(results[0].geometry.location));
-                        markersArray.push(new google.maps.Marker({
-                            map: map,
-                            position: results[0].geometry.location,
-                            icon: icon
-                        }));
-                    } else {
-                        alert('Geocode was not successful due to: ' + status);
-                    }
-                };
-            };
-            
-            for (var i = 0; i < originList.length; i++) {
-                var results = response.rows[i].elements;
-                geocoder.geocode({'address': originList[i]},
-                    showGeocodedAddressOnMap(false));
-                for (var j = 0; j < results.length; j++) {
-                    geocoder.geocode({'address': destinationList[j]},
-                        showGeocodedAddressOnMap(true));
-                    outputDiv.innerHTML += originList[i] + ' to ' + destinationList[j] +
-                        ': ' + results[j].distance.text + ' in ' +
-                        results[j].duration.text + '<br>';
-                }
-            }
-        }
-    });
-*/
+   
 }
 
 };
-function deleteMarkers(markersArray) {
-    for (var i = 0; i < markersArray.length; i++) {
-        markersArray[i].setMap(null);
-    }
-    markersArray = [];
-};
-
 
 function call(functionToCall) {
     functionToCall();
 };
+
+function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+    /*var waypts = [];
+    var checkboxArray = document.getElementById('waypoints');
+    for (var i = 0; i < checkboxArray.length; i++) {
+        if (checkboxArray.options[i].selected) {
+            waypts.push({
+                location: checkboxArray[i].value,
+                stopover: true
+            });
+        }
+    }
+    */
+    directionsService.route({
+        origin: objOriginPoint,
+        destination: objFinalPoint,
+        waypoints: arrPositions,
+        optimizeWaypoints: true,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, function (response, status) {
+        if (status === google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+            var route = response.routes[0];
+            var summaryPanel = document.getElementById('directions-panel');
+            summaryPanel.innerHTML = '';
+            // For each route, display summary information.
+            for (var i = 0; i < route.legs.length; i++) {
+                var routeSegment = i + 1;
+                summaryPanel.innerHTML += '<b>Route Segment: ' + routeSegment +
+                    '</b><br>';
+                summaryPanel.innerHTML += route.legs[i].start_address + ' to ';
+                summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
+                summaryPanel.innerHTML += route.legs[i].distance.text + '<br><br>';
+            }
+        } else {
+            window.alert('Directions request failed due to ' + status);
+        }
+    });
+}
