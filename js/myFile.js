@@ -209,6 +209,7 @@ function initMap() {
         //call(funGeoCodeFunction);
         //funGeoCode();
         calculateRoute();
+		//$('#map').fadeIn();
         //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
     });
 };
