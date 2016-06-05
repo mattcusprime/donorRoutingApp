@@ -9,6 +9,7 @@ var objDirectionsDisplay;// = new google.maps.DirectionsRenderer;
 var objOriginPoint = {};
 var objFinalPoint = {};
 var stepDisplay;
+var arrLastCalculatedRoute = [];
 function calculateRoute() {
     var table = $('#AddressesWithItems').DataTable();
     var data = table.rows().data();
@@ -192,7 +193,15 @@ function showSteps(directionResult, markerArray, stepDisplay, map) {
         marker.setPosition(myRoute.steps[i].start_location);
         attachInstructionText(
             stepDisplay, marker, myRoute.steps[i].instructions, map);
+        var objForPrintOut = {
+            instructions: myRoute.steps[i].instructions,
+            position: myRoute.steps[i].start_location,
+            markerForPrint: marker
+        };
+
+        arrLastCalculatedRoute.push(objForPrintOut);
     }
+    console.log(arrLastCalculatedRoute);
 };
 
 function attachInstructionText(stepDisplay, marker, text, map) {
