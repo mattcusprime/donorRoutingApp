@@ -494,3 +494,16 @@ function pdfRoute(arrayWithInstructionsObjects) {
     };
     pdfMake.createPdf(docDefinition).open();
 };
+
+function getDataTablesNumberOfRows(idOfDataTable) {
+    var strFullId = '#' + idOfDataTable;
+    if ($.fn.DataTable.isDataTable(strFullId)) {
+        var numberOfRows = $(strFullId).DataTable().rows().data().length;
+        return numberOfRows;
+    }
+    else {
+        var numberOfRows = $(strFullId).rows().data().length;
+        return numberOfRows;
+    };
+
+};

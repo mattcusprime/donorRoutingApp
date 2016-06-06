@@ -19,8 +19,19 @@ var myItems = {};
                 var output = { data: [] };
                 if (d.action === 'create') {
                     $.each(d.data, function (key, value) {
-                        var id = $('#AddressesWithItems').find('tr').length;
-                        //var id = key + 1;
+                        //var id = $('#AddressesWithItems').find('tr').length;
+                        var id = getDataTablesNumberOfRows('AddressesWithItems');
+                        /*var strFullId = '#' + 'AddressesWithItems';
+                        if ($.fn.DataTable.isDataTable(strFullId)) {
+                            var numberOfRows = $(strFullId).DataTable().rows().data().length;
+                            id = numberOfRows;
+                        }
+                        else {
+                            var numberOfRows = $(strFullId).rows().data().length;
+                            id = numberOfRows;
+                        };*/
+
+                        
                         value.DT_RowId = id;
                         myItems[id] = value;
                         output.data.push(value);
