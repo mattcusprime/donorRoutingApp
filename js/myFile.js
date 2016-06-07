@@ -116,9 +116,9 @@ function initMap() {
         // Browser doesn't support Geolocation
         handleLocationError(false, infoWindow, map.getCenter());
     }
-    
-    
-   
+
+
+
     //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
     var calculateRoute = function () {
         // First, remove any existing markers from the map.
@@ -193,7 +193,7 @@ function initMap() {
                 };
                 strTableString += "</tbody></table>";
                 $('#directions-panel').append(strTableString);
-                var arrButtons = ['copy','pdf'];
+                var arrButtons = ['copy', 'pdf'];
                 var strDomString = '<"top"Bpl>rt<"bottom"fl><"clear">';
                 $('#directionsTable').DataTable({
                     'pageLength': 50,
@@ -209,10 +209,103 @@ function initMap() {
         //call(funGeoCodeFunction);
         //funGeoCode();
         calculateRoute();
-		//$('#map').fadeIn();
+        //$('#map').fadeIn();
         //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
     });
 };
+var objPolygonCoords = [];
+function initMapForZone() {
+
+    var numInitialLat = 35.75;
+    var numInitialLng = -78.6;
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: numInitialLat, lng: numInitialLng },
+        //center: { loc },
+        zoom: 15
+    });
+    map.addListener('click', function (e) {
+        placeMarkerAndPanTo(e.latLng, map);
+        var objCoordPoint = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+        objPolygonCoords.push(objCoordPoint);
+    });
+    var placeMarkerAndPanTo = function (latLngToPlace, map) {
+        var marker = new google.maps.Marker({
+            position: latLngToPlace,
+            map: map
+        });
+        map.panTo(latLngToPlace);
+    };
+    var infoWindow = new google.maps.InfoWindow({ map: map });
+    var table = $('#AddressesWithItems').DataTable();
+    var tableData = table.rows().data();
+    var createZone = function (map) {
+        var drawnPolyGon = new google.maps.Polygon({
+            paths: objPolygonCoords,
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35
+        });
+        //objPolygonCoords = [];
+        drawnPolyGon.setMap(map);
+        /*for (var i = 0; i < tableData.length; i++) {
+            var objCurrentRow = tableData[i];
+            var strCurrentAddress = objCurrentRow.street + "," + objCurrentRow.city + "," + objCurrentRow.state + "," + objCurrentRow.zip_code;
+            var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var strMarkerLabel = labels[i];
+        };*/
+
+    };
+    var placeMarkersFromDataTable = function () {
+        var table = $('#AddressesWithItems').DataTable();
+        var tableData = table.rows().data();
+        objPolygonCoords = [];
+        var objLatLng = {};
+        for (var i = 0; i < tableData.length; i++) {
+            var objCurrentRow = tableData[i];
+            var strCurrentAddress = objCurrentRow.street + "," + objCurrentRow.city + "," + objCurrentRow.state + "," + objCurrentRow.zip_code;
+            geocoder = new google.maps.Geocoder();
+            if (geocoder) {
+                geocoder.geocode({ 'address': strCurrentAddress }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+                            map.setCenter(results[0].geometry.location);
+                            var marker = new google.maps.Marker({
+                                position: results[0].geometry.location,
+                                map: map,
+                                title: i
+                            });
+                            objLatLng = marker.getPosition();
+                            objPolygonCoords.push({ lat: objLatLng.lat(), lng: objLatLng.lng() });
+                            if (i == tableData.length) {
+                                createZone(map);
+                            };
+                        } else {
+                            alert("No results found");
+                        }
+                    } else {
+                        alert("Geocode was not successful for the following reason: " + status);
+                    }
+                })
+
+
+
+
+            };
+            
+        };
+    };
+
+    $('#createZone').click(function () {
+        createZone(map);
+    });
+    $('#createZoneFromTable').click(function () {
+        placeMarkersFromDataTable();
+    });
+};
+
+
 
 //var panorama;
 function showSteps(directionResult, markerArray, stepDisplay, map) {
@@ -222,9 +315,9 @@ function showSteps(directionResult, markerArray, stepDisplay, map) {
     var arrAllMarkers = [];
     var myRoute = directionResult.routes[0].legs[0];
     for (var i = 0; i <= myRoute.steps.length; i++) {
-        
 
-        
+
+
         if (i != myRoute.steps.length) {
             var marker = markerArray[i] = markerArray[i] || new google.maps.Marker;
             marker.setMap(map);
@@ -244,9 +337,9 @@ function showSteps(directionResult, markerArray, stepDisplay, map) {
             });
             //attachInstructionText(stepDisplay, marker, directionResult.routes[0].legs[0].end_address, map);
         };
-       
+
     }
-    
+
 };
 function toggleStreetView() {
     var toggle = panorama.getVisible();
@@ -258,18 +351,18 @@ function toggleStreetView() {
 };
 
 function attachInstructionText(stepDisplay, marker, text, map) {
-        google.maps.event.addListener(marker, 'click', function () {
-            // Open an info window when the marker is clicked on, containing the text
-            // of the step.
-            stepDisplay.setContent(text);
-            stepDisplay.open(map, marker);
-            var position = marker.getPosition();
-            var objposition = {};
-            objposition.lat = position.lat();
-            objposition.lng = position.lng();
-            addStreetListenToMarker(objposition);
-        });
-    
+    google.maps.event.addListener(marker, 'click', function () {
+        // Open an info window when the marker is clicked on, containing the text
+        // of the step.
+        stepDisplay.setContent(text);
+        stepDisplay.open(map, marker);
+        var position = marker.getPosition();
+        var objposition = {};
+        objposition.lat = position.lat();
+        objposition.lng = position.lng();
+        addStreetListenToMarker(objposition);
+    });
+
 };
 /*function resetPanorama(arrayOfMarkers) {
 
@@ -287,7 +380,7 @@ function attachInstructionText(stepDisplay, marker, text, map) {
     };
 };*/
 function addStreetListenToMarker(objposition) {
-    
+
     panorama.setPosition(objposition);
     //toggleStreetView();
     var visCheck = panorama.getVisible();
@@ -322,8 +415,6 @@ function funGeoCode() {
 
 
 };
-
-
 
 
 
