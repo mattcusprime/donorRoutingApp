@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+    <script src="DataTables-1.10.7/js/moment-with-locales.min.js"></script>
+    <script src="DataTables-1.10.7/js/jquery-2.1.3.js"></script>
+    <link href="css/pretty-calendar.css" rel="stylesheet" />
+    <script src="js/pretty-calendar.js"></script>
+    <link href="bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+
+
+</head>
+<body>
+    <script>
+        $('#document').ready(function () {
+            var events = [];
+            events[0] = [];
+            events[0][0] = "Sunday";
+            events[0][1] = "3:00pm";
+            events[0][2] = "Zone 1 Pickup"
+            events[0][3] = "#c0c0c0";
+            //events[0][4] = "6:00pm"; <- optional end time
+            events[1] = [];
+            events[1][0] = "Monday";
+            events[1][1] = "12:00pm";
+            events[1][2] = "Zone 2 Pickup"
+            events[1][3] = "#8FD8D8";
+
+            var prettyCal = new PrettyCalendar(events, "navWrap", true);
+           
+
+        });
+        function leftNav() {
+
+        }
+        function rightNav() {
+
+        }
+        /*
+        var newEvents = [];
+            newEvents[0] = [];
+            newEvents[0][0] = "Thursday";
+            newEvents[0][1] = "1:00pm";
+            newEvents[0][2] = "New event"
+            newEvents[0][3] = "red";
+        */
+
+    </script>
+    <div id="simple-calendar"></div>
+    <div id="navWrap" style="width:70%;height:80%;position:absolute;top:10%;margin:0 auto;right:0;left:0;"></div>
+</body>
+</html>

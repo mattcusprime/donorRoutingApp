@@ -72,6 +72,12 @@ var myItems = {};
                     "name": "last_name"
                 },
                 {
+                    "label": "Date:",
+                    "name": "date",
+                    "type": "datetime",
+                    "format": "MM\/DD\/YY h:mm a"
+                },
+                {
                     "label": "Item Being Dropped Off",
                     "name": "item_being_dropped_off"
                 },
@@ -111,6 +117,9 @@ var myItems = {};
                 },
                 {
                     "data": "last_name"
+                },
+                {
+                    "data": "date"
                 },
                 {
                     "data": "item_being_dropped_off"
