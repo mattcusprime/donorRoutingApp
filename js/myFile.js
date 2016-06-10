@@ -213,6 +213,156 @@ function initMap() {
         //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
     });
 };
+
+function initMapForDataSample() {
+
+    // Instantiate an info window to hold step text.
+    stepDisplay = new google.maps.InfoWindow;
+    var numInitialLat = 36;
+    var numInitialLng = -80;
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: numInitialLat, lng: numInitialLng },
+        //center: { loc },
+        zoom: 15
+    });
+    var infoWindow = new google.maps.InfoWindow({ map: map });
+    panorama = new google.maps.StreetViewPanorama(
+      document.getElementById('pano'), {
+          position: { lat: numInitialLat, lng: numInitialLng },
+          pov: {
+              heading: 270,
+              pitch: 0
+          },
+          visible: false
+      });
+
+    // Try HTML5 geolocation.
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            objOriginPoint.lat = position.coords.latitude;
+            objOriginPoint.lng = position.coords.longitude;
+            objOriginPoint.setByLocation = true;
+            infoWindow.setPosition(pos);
+            infoWindow.setContent('Location found.');
+            map.setCenter(pos);
+        }, function () {
+            handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+    }
+
+
+
+    //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
+    var calculateRoute = function () {
+        // First, remove any existing markers from the map.
+        //var objFinalPoint;
+        //var objOriginPoint;
+        //myItemsd
+        objDirectionsService = new google.maps.DirectionsService;
+        objDirectionsDisplay = new google.maps.DirectionsRenderer({ map: map });
+        var arrMidPoints = [];
+        for (var i = 0; i < arrMarkerArray.length; i++) {
+            arrMarkerArray[i].setMap(null);
+        };
+        var table = $('#AddressesWithItems').DataTable();
+        //$('#tblContainer').fadeOut();
+        var tableData = table.rows().data();
+        for (var i = 0; i < myItems.length; i++) {
+            var myItems = tableData[i];
+            var strCurrentAddress = objCurrentRow.Address1 + "," + objCurrentRow.City + "," + objCurrentRow.state + "," + objCurrentRow.Zip;
+            var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var objLiteralLocation = {};
+            objLiteralLocation.Lat = Number(objCurrentRow.Lat);
+            objLiteralLocation.Lng = Number(objCurrentRow.Lng);
+            var strMarkerLabel = labels[i];
+            if (i == tableData.length - 1) {
+                //geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, true, arrMarkerArray, "final");
+                objFinalPoint = objLiteralLocation;
+
+            }
+            else if (i == 0) {
+                //geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, false, arrMarkerArray, "origin");
+                if (objOriginPoint.setByLocation) {
+
+                }
+                else {
+                    objOriginPoint = objLiteralLocation;
+                }
+                //objOriginPoint = strCurrentAddress;
+            }
+            else {
+                //geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, false, arrMarkerArray, "mid");
+                /*arrMidPoints.push({
+                    location: objLiteralLocation,
+                    stopover: true
+                });*/
+                var wayPoint = {
+                    location: objLiteralLocation,
+                    stopover: true
+                };
+                arrMidPoints.push(wayPoint);
+            };
+        };
+        //var numLengthOfMarkerArray = arrMarkerArray.length;
+        // Retrieve the start and end locations and create a DirectionsRequest using
+        // WALKING directions.
+        objDirectionsService.route({
+            origin: objOriginPoint,
+            destination: objFinalPoint,
+            waypoints: arrMidPoints,
+            optimizeWaypoints: true,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, function (response, status) {
+            // Route the directions and pass the response to a function to create
+            // markers for each step.
+            if (status === google.maps.DirectionsStatus.OK) {
+                currentRoute = response.routes[0];
+                document.getElementById('warnings-panel').innerHTML =
+                    '<b>' + response.routes[0].warnings + '</b>';
+                objDirectionsDisplay.setDirections(response);
+                showSteps(response, arrMarkerArray, stepDisplay, map);
+                //resetPanorama(objOriginPoint, arrMarkerArray, objFinalPoint);
+                //var summaryPanel = document.getElementById('directions-panel');
+                //summaryPanel.innerHTML = '';
+                $('#directionsTable').remove();
+                $('#directions-panel').show();
+                var strTableString = '<table id="directionsTable" class="display compact cell-border"><thead><tr><th>Step</th><th>Route</th></tr></thead><tbody>'
+                // For each route, display summary information.
+                for (var i = 0; i < currentRoute.legs[0].steps.length; i++) {
+                    var routeSegment = i + 1;
+                    //summaryPanel.innerHTML += currentRoute.legs[0].steps[i].instructions + '<br>';
+                    strTableString += '<tr><td>' + routeSegment + '</td><td>' + currentRoute.legs[0].steps[i].instructions + '</td></tr>';
+                };
+                strTableString += "</tbody></table>";
+                $('#directions-panel').append(strTableString);
+                var arrButtons = ['copy', 'pdf'];
+                var strDomString = '<"top"Bpl>rt<"bottom"fl><"clear">';
+                $('#directionsTable').DataTable({
+                    'pageLength': 50,
+                    'buttons': arrButtons,
+                    'dom': strDomString
+                });
+            } else {
+                window.alert('Directions request failed due to ' + response + '_' +status);
+            }
+        });
+    };
+    $('#routeAddresses').click(function () {
+        //call(funGeoCodeFunction);
+        //funGeoCode();
+        calculateRoute();
+        //$('#map').fadeIn();
+        //calculateAndDisplayRoute(objDirectionsDisplay, objDirectionsService, arrMarkerArray, stepDisplay, map);
+    });
+};
+
 var objPolygonCoords = [];
 function initMapForZone() {
 

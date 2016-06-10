@@ -1,0 +1,168 @@
+﻿
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Donor Routing App</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/s/dt/jqc-1.12.0,moment-2.11.2,dt-1.10.11,b-1.1.2,se-1.1.2/datatables.min.css">
+    <link rel="stylesheet" type="text/css" href="css/generator-base.css">
+    <link rel="stylesheet" type="text/css" href="css/editor.dataTables.min.css">
+    <link href="bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script type="text/javascript" charset="utf-8" src="https://cdn.datatables.net/s/dt/jqc-1.12.0,moment-2.11.2,dt-1.10.11,b-1.1.2,se-1.1.2/datatables.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/dataTables.editor.min.js"></script>
+    <!--<script type="text/javascript" charset="utf-8" src="js/table.AddressesWithItemsLocal.js"></script>-->
+    <script src="js/table.AddressesWithItemsLocal_SampleData.js"></script>
+    <script src="bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
+    <script src="js/pdfmake.js"></script>
+    <script src="js/vfs_fonts.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/dataTables.buttons.min.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/buttons.colVis.min.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/buttons.foundation.min.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/buttons.html5.min.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/buttons.jqueryui.min.js"></script>
+    <script src="DataTablesDownloadBuilder/Buttons-1.0.3/js/buttons.print.min.js"></script>
+    <script src="js/myFile.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        #map {
+            opacity: 100;
+            height: 100%;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        #pano {
+            opacity: 100;
+            height: 100%;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        #outer {
+            opacity: 100;
+            height: 100%;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        #floating-panel {
+            position: absolute;
+            top: 10px;
+            left: 25%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
+
+        #warnings-panel {
+            opacity: 100;
+            width: 100%;
+            height: 10%;
+            text-align: center;
+        }
+
+        #directions-panel {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #999;
+            opacity: 100;
+            width: 100%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="dataTables">
+    <div id="tblContainer" class="container">
+        <h1>
+            Route<span>Addresses</span>
+        </h1>
+        <table class="display compact cell-borde" id="AddressesWithItems">
+            <thead>
+                <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Date:</th>
+                    <th>Item Being Dropped Off</th>
+                    <th>Street</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Zip Code</th>
+                    <th>Lat</th>
+                    <th>Lng</th>
+                </tr>
+            </thead>
+        </table>
+        <script>
+            $('document').ready(function () {
+                //$('#pano').hide();
+                //$('#map').hide();
+                //$(".fancybox").fancybox();
+                $('#showMap').click(function () {
+                    $('#tblContainer').fadeOut();
+                    $('#map').fadeIn();
+                });
+                $('#showTable').click(function () {
+                    $('#map').fadeOut();
+                    $('#tblContainer').fadeIn();
+                });
+                $('#printRoute').click(function () {
+                    pdfRoute(arrLastCalculatedRoute);
+                });
+                $('#directions-panel').hide();
+                var strScriptUrl = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCzyiqBO_5XdhIyozK30VcFyDKZiUD_2nw&callback=initMap';
+                $.getScript(strScriptUrl, function (data, textStatus, jqxhr) {
+                    console.log(data); // Data returned
+                    console.log(textStatus); // Success
+                    console.log(jqxhr.status); // 200
+                    console.log("Load was performed.");
+                }).done(function () {
+                    initMapForDataSample();
+
+
+                });
+
+
+
+
+
+            });
+        </script>
+        <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzyiqBO_5XdhIyozK30VcFyDKZiUD_2nw&callback=initMap" async defer></script>-->
+    </div>
+    <div class="container">
+        <!--<button id="showMap" class="col-md-offset-2 col-md-2">Maximize Map</button>
+        <button id="showTable" class="col-md-2">Maximize Table</button>
+
+        <button id="setZoom" class="col-md-2">Set Zoom</button>
+
+        <form id="zoomForm">
+            <input id="zoomVal" type="text" />
+            <input type="submit" />
+        </form>-->
+        <button class="btn btn-primary col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8 col-sm-offset-2 col-sm-8" id="routeAddresses">Calculate Route</button>
+    </div>
+    <!--<div class="container">
+        <button class="btn btn-primary col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8 col-sm-offset-2 col-sm-8" id="printRoute">Print Route</button>
+
+    </div>-->
+    <div id="directions-panel"></div>
+    <div id="map"></div>
+    <div id="pano"></div>
+    <div id="warnings-panel"></div>
+
+
+
+    <!--<div id="map"></div>-->
+</body>
+</html>
