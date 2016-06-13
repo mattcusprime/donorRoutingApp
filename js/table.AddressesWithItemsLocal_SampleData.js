@@ -11,7 +11,9 @@ var myItemsd = {};
     $(document).ready(function () {
         $.get('data/DayRouteDetail.txt', function (sampleData) { }).done(function (sampleData) {
             sampleData = JSON.parse(sampleData);
-            myItemsd = sampleData.d;
+            //myItemsd = sampleData.d;
+            //myItemsd = sampleData.d.slice(0,7);
+			myItemsd = sampleData.d.slice(0,6);
             //paired down to 8 values to get just waypoints
 
             //myItemsd = myItemsd.slice(0, 7);
@@ -56,6 +58,7 @@ var myItemsd = {};
             //    myItems = JSON.parse(localStorage.getItem('myItems'));
                 
             //};
+            //myItems = myItemsd.slice(0, 7);
             myItems = myItemsd;
             editor = new $.fn.dataTable.Editor({
                 //ajax: 'php/table.AddressesWithItems.php',

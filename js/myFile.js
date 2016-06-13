@@ -178,6 +178,7 @@ function initMap() {
                 document.getElementById('warnings-panel').innerHTML =
                     '<b>' + response.routes[0].warnings + '</b>';
                 objDirectionsDisplay.setDirections(response);
+
                 showSteps(response, arrMarkerArray, stepDisplay, map);
                 //resetPanorama(objOriginPoint, arrMarkerArray, objFinalPoint);
                 //var summaryPanel = document.getElementById('directions-panel');
@@ -201,7 +202,7 @@ function initMap() {
                     'dom': strDomString
                 });
             } else {
-                window.alert('Directions request failed due to ' + status);
+                //window.alert('Directions request failed due to ' + status);
             }
         });
     };
@@ -275,26 +276,30 @@ function initMapForDataSample() {
         //$('#tblContainer').fadeOut();
         var tableData = table.rows().data();
         for (var i = 0; i < myItems.length; i++) {
-            var myItems = tableData[i];
+            //var myItems = tableData[i];
+            var objCurrentRow = myItems[i];
             var strCurrentAddress = objCurrentRow.Address1 + "," + objCurrentRow.City + "," + objCurrentRow.state + "," + objCurrentRow.Zip;
             var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             var objLiteralLocation = {};
             objLiteralLocation.Lat = Number(objCurrentRow.Lat);
             objLiteralLocation.Lng = Number(objCurrentRow.Lng);
             var strMarkerLabel = labels[i];
-            if (i == tableData.length - 1) {
+            if (i == myItems.length - 1) {
                 //geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, true, arrMarkerArray, "final");
-                objFinalPoint = objLiteralLocation;
+                //objFinalPoint = objLiteralLocation;
+                objFinalPoint = strCurrentAddress;
 
             }
             else if (i == 0) {
                 //geocodeAddress(strCurrentAddress, strMarkerLabel, geocoder, map, false, arrMarkerArray, "origin");
-                if (objOriginPoint.setByLocation) {
+                //objOriginPoint = objLiteralLocation;
+                objOriginPoint = strCurrentAddress;
+                /*if (objOriginPoint.setByLocation) {
 
                 }
                 else {
                     objOriginPoint = objLiteralLocation;
-                }
+                }*/
                 //objOriginPoint = strCurrentAddress;
             }
             else {
@@ -304,7 +309,7 @@ function initMapForDataSample() {
                     stopover: true
                 });*/
                 var wayPoint = {
-                    location: objLiteralLocation,
+                    location: strCurrentAddress,
                     stopover: true
                 };
                 arrMidPoints.push(wayPoint);
@@ -315,7 +320,9 @@ function initMapForDataSample() {
         // WALKING directions.
         objDirectionsService.route({
             origin: objOriginPoint,
-            destination: objFinalPoint,
+			//origin point made final point for example
+            //destination: objFinalPoint,
+			destination: objOriginPoint,
             waypoints: arrMidPoints,
             optimizeWaypoints: true,
             travelMode: google.maps.TravelMode.DRIVING
@@ -327,7 +334,8 @@ function initMapForDataSample() {
                 document.getElementById('warnings-panel').innerHTML =
                     '<b>' + response.routes[0].warnings + '</b>';
                 objDirectionsDisplay.setDirections(response);
-                showSteps(response, arrMarkerArray, stepDisplay, map);
+                //showSteps(response, arrMarkerArray, stepDisplay, map);
+
                 //resetPanorama(objOriginPoint, arrMarkerArray, objFinalPoint);
                 //var summaryPanel = document.getElementById('directions-panel');
                 //summaryPanel.innerHTML = '';
@@ -335,10 +343,17 @@ function initMapForDataSample() {
                 $('#directions-panel').show();
                 var strTableString = '<table id="directionsTable" class="display compact cell-border"><thead><tr><th>Step</th><th>Route</th></tr></thead><tbody>'
                 // For each route, display summary information.
-                for (var i = 0; i < currentRoute.legs[0].steps.length; i++) {
-                    var routeSegment = i + 1;
-                    //summaryPanel.innerHTML += currentRoute.legs[0].steps[i].instructions + '<br>';
-                    strTableString += '<tr><td>' + routeSegment + '</td><td>' + currentRoute.legs[0].steps[i].instructions + '</td></tr>';
+                var stepCounter = 0;
+                for (var j = 0; j < currentRoute.legs.length; j++) {
+                    var objThisLegRoute = currentRoute.legs[j];
+                    showStepsMultiLeg(objThisLegRoute, arrMarkerArray, stepDisplay, map);
+                    for (var i = 0; i < currentRoute.legs[j].steps.length; i++) {
+                        var routeSegment = (i + 1) * (j + 1);
+                        stepCounter++;
+                        //summaryPanel.innerHTML += currentRoute.legs[0].steps[i].instructions + '<br>';
+                        strTableString += '<tr><td>' + stepCounter + '</td><td>' + currentRoute.legs[j].steps[i].instructions + '</td></tr>';
+                    };
+
                 };
                 strTableString += "</tbody></table>";
                 $('#directions-panel').append(strTableString);
@@ -350,7 +365,7 @@ function initMapForDataSample() {
                     'dom': strDomString
                 });
             } else {
-                window.alert('Directions request failed due to ' + response + '_' +status);
+                console.log('Directions request failed due to ' + response + '_' +status);
             }
         });
     };
@@ -464,6 +479,7 @@ function showSteps(directionResult, markerArray, stepDisplay, map) {
     // when calculating new routes.
     var arrAllMarkers = [];
     var myRoute = directionResult.routes[0].legs[0];
+
     for (var i = 0; i <= myRoute.steps.length; i++) {
 
 
@@ -478,6 +494,44 @@ function showSteps(directionResult, markerArray, stepDisplay, map) {
             var marker = markerArray[i] = markerArray[i] || new google.maps.Marker;
             marker.setMap(map);
             marker.setPosition(directionResult.routes[0].legs[0].end_location);
+            var position = marker.getPosition();
+            var objposition = {};
+            objposition.lat = position.lat();
+            objposition.lng = position.lng();
+            google.maps.event.addListener(marker, 'click', function () {
+                addStreetListenToMarker(objposition);
+            });
+            //attachInstructionText(stepDisplay, marker, directionResult.routes[0].legs[0].end_address, map);
+        };
+
+    }
+
+};
+
+
+function showStepsMultiLeg(myLegOfTheRoute, markerArray, stepDisplay, map) {
+    // For each step, place a marker, and add the text to the marker's infowindow.
+    // Also attach the marker to an array so we can keep track of it and remove it
+    // when calculating new routes.
+    var arrAllMarkers = [];
+    //var myRoute = directionResult.routes[0].legs[0];
+
+    for (var i = 0; i <= myLegOfTheRoute.steps.length; i++) {
+
+
+
+        if (i != myLegOfTheRoute.steps.length) {
+            //var marker = markerArray[i] = markerArray[i] || new google.maps.Marker;
+            var marker = new google.maps.Marker;
+            marker.setMap(map);
+            marker.setPosition(myLegOfTheRoute.steps[i].start_location);
+            attachInstructionText(stepDisplay, marker, myLegOfTheRoute.steps[i].instructions, map);
+        }
+        else {
+            //var marker = markerArray[i] = markerArray[i] || new google.maps.Marker;
+            var marker = new google.maps.Marker;
+            marker.setMap(map);
+            marker.setPosition(myLegOfTheRoute.end_location);
             var position = marker.getPosition();
             var objposition = {};
             objposition.lat = position.lat();
@@ -651,7 +705,7 @@ function calculateAndDisplayRouteV2(directionsService, directionsDisplay) {
                 summaryPanel.innerHTML += route.legs[i].distance.text + '<br><br>';
             }
         } else {
-            window.alert('Directions request failed due to ' + status);
+            //window.alert('Directions request failed due to ' + status);
         }
     });
 };
